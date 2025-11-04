@@ -3,5 +3,7 @@
   "buildCommand": "cd dashboard && npm install && npm run build",
   "outputDirectory": "dashboard/dist",
   "framework": "vite",
-  "installCommand": "npm install --prefix dashboard"
+  "env": {
+    "VITE_API_URL": "https://ruuvitag-api-production.up.railway.app"
+  }
 }
