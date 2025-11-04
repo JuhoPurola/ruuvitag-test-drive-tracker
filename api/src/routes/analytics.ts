@@ -28,8 +28,8 @@ router.get('/stats', async (_req: Request, res: Response): Promise<void> => {
       select: { distance: true, duration: true },
     });
 
-    const totalDistance = completedDrives.reduce((sum, drive) => sum + (drive.distance || 0), 0);
-    const totalDuration = completedDrives.reduce((sum, drive) => sum + (drive.duration || 0), 0);
+    const totalDistance = completedDrives.reduce((sum: number, drive: any) => sum + (drive.distance || 0), 0);
+    const totalDuration = completedDrives.reduce((sum: number, drive: any) => sum + (drive.duration || 0), 0);
     const count = completedDrives.length || 1;
 
     const stats = {
@@ -69,9 +69,9 @@ router.get('/vehicles', async (_req: Request, res: Response): Promise<void> => {
       },
     });
 
-    const vehicleStats = vehicles.map((vehicle) => {
+    const vehicleStats = vehicles.map((vehicle: any) => {
       const testDriveCount = vehicle.testDrives.length;
-      const totalDistance = vehicle.testDrives.reduce((sum, drive) => sum + (drive.distance || 0), 0);
+      const totalDistance = vehicle.testDrives.reduce((sum: number, drive: any) => sum + (drive.distance || 0), 0);
 
       return {
         vehicleId: vehicle.id,
