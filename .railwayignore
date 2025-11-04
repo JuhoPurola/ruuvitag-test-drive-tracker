@@ -1,0 +1,9 @@
+# Ignore other workspaces when deploying API
+dashboard/
+mobile/
+shared/
+
+# Ignore root workspace config
+package.json
+package-lock.json
+node_modules/
