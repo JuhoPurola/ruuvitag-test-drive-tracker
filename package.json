@@ -1,0 +1,23 @@
+{
+  "name": "ruuvitag-dealership",
+  "version": "1.0.0",
+  "description": "RuuviTag Test Drive Tracker - Automotive Dealership Management System",
+  "private": true,
+  "workspaces": [
+    "api",
+    "dashboard",
+    "mobile",
+    "shared"
+  ],
+  "scripts": {
+    "api": "npm run dev --workspace=api",
+    "dashboard": "npm run dev --workspace=dashboard",
+    "mobile": "npm start --workspace=mobile",
+    "install:all": "npm install && npm install --workspace=api && npm install --workspace=dashboard && npm install --workspace=mobile",
+    "build:api": "npm run build --workspace=api",
+    "build:dashboard": "npm run build --workspace=dashboard"
+  },
+  "keywords": ["ruuvitag", "automotive", "dealership", "iot", "tracking"],
+  "author": "",
+  "license": "MIT"
+}

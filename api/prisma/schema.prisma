@@ -1,0 +1,132 @@
+// Prisma schema for RuuviTag Test Drive Tracker
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vehicle {
+  id          String      @id @default(uuid())
+  make        String
+  model       String
+  year        Int
+  vin         String      @unique
+  color       String
+  available   Boolean     @default(true)
+  ruuviTagMac String?     @unique
+  testDrives  TestDrive[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("vehicles")
+}
+
+model Customer {
+  id             String      @id @default(uuid())
+  name           String
+  email          String
+  phone          String
+  address        String?
+  driversLicense String
+  testDrives     TestDrive[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@map("customers")
+}
+
+model SalesPerson {
+  id         String      @id @default(uuid())
+  name       String
+  email      String      @unique
+  phone      String
+  role       String      @default("salesperson")
+  testDrives TestDrive[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@map("salespeople")
+}
+
+model TestDrive {
+  id             String       @id @default(uuid())
+  vehicleId      String
+  vehicle        Vehicle      @relation(fields: [vehicleId], references: [id])
+  customerId     String
+  customer       Customer     @relation(fields: [customerId], references: [id])
+  salesPersonId  String
+  salesPerson    SalesPerson  @relation(fields: [salesPersonId], references: [id])
+  startTime      DateTime     @default(now())
+  endTime        DateTime?
+  status         String       @default("active") // active, completed, cancelled
+  distance       Float?       // in kilometers
+  duration       Int?         // in minutes
+  notes          String?
+  locations      Location[]
+  sensorData     SensorData[]
+  alerts         Alert[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([vehicleId])
+  @@index([customerId])
+  @@index([salesPersonId])
+  @@index([status])
+  @@map("test_drives")
+}
+
+model Location {
+  id          String    @id @default(uuid())
+  testDriveId String
+  testDrive   TestDrive @relation(fields: [testDriveId], references: [id], onDelete: Cascade)
+  latitude    Float
+  longitude   Float
+  altitude    Float?
+  speed       Float?    // km/h
+  heading     Float?    // degrees
+  accuracy    Float?    // meters
+  timestamp   DateTime  @default(now())
+
+  @@index([testDriveId])
+  @@index([timestamp])
+  @@map("locations")
+}
+
+model SensorData {
+  id            String    @id @default(uuid())
+  testDriveId   String
+  testDrive     TestDrive @relation(fields: [testDriveId], references: [id], onDelete: Cascade)
+  temperature   Float     // Celsius
+  humidity      Float     // percentage
+  pressure      Float     // hPa
+  accelerationX Float?
+  accelerationY Float?
+  accelerationZ Float?
+  battery       Int       // percentage
+  rssi          Int?      // signal strength
+  timestamp     DateTime  @default(now())
+
+  @@index([testDriveId])
+  @@index([timestamp])
+  @@map("sensor_data")
+}
+
+model Alert {
+  id           String    @id @default(uuid())
+  testDriveId  String
+  testDrive    TestDrive @relation(fields: [testDriveId], references: [id], onDelete: Cascade)
+  type         String    // geofence, speed, duration, battery, sensor
+  message      String
+  severity     String    // info, warning, critical
+  acknowledged Boolean   @default(false)
+  timestamp    DateTime  @default(now())
+
+  @@index([testDriveId])
+  @@index([acknowledged])
+  @@index([timestamp])
+  @@map("alerts")
+}
