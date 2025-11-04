@@ -1,9 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd dashboard && npm install && npm run build",
-  "outputDirectory": "dashboard/dist",
-  "framework": "vite",
-  "env": {
-    "VITE_API_URL": "https://ruuvitag-api-production.up.railway.app"
-  }
+  "framework": "vite"
 }
