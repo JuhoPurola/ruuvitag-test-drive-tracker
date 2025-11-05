@@ -11,6 +11,7 @@ import dotenv from 'dotenv';
 import testDriveRoutes from './routes/testDrives';
 import vehicleRoutes from './routes/vehicles';
 import customerRoutes from './routes/customers';
+import salespeopleRoutes from './routes/salespeople';
 import ruuvitagRoutes from './routes/ruuvitag';
 import analyticsRoutes from './routes/analytics';
 import { errorHandler } from './middleware/errorHandler';
@@ -54,6 +55,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/testdrives', testDriveRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/salespeople', salespeopleRoutes);
 app.use('/api/ruuvitag', ruuvitagRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
