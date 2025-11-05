@@ -1,0 +1,21 @@
+# Ignore mobile and dashboard directories - only deploy API
+mobile/
+dashboard/
+
+# Ignore frontend directories
+frontend/
+
+# Node modules will be installed during build
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
