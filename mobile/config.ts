@@ -11,4 +11,5 @@ export const API_ENDPOINTS = {
   salespeople: `${API_URL}/api/salespeople`,
   analytics: `${API_URL}/api/analytics`,
   ruuvitags: `${API_URL}/api/ruuvitag/tags`,
+  registerRuuvitag: `${API_URL}/api/ruuvitag/register`,
 };

@@ -226,8 +226,51 @@ router.get('/latest/:testDriveId', async (req: Request, res: Response): Promise<
 });
 
 /**
+ * POST /api/ruuvitag/register
+ * Register a new RuuviTag MAC address
+ */
+router.post('/register', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { mac, name } = req.body;
+
+    if (!mac) {
+      res.status(400).json({
+        success: false,
+        error: 'MAC address is required',
+      });
+      return;
+    }
+
+    // Upsert: create if not exists, update lastSeen if exists
+    const tag = await prisma.ruuviTag.upsert({
+      where: { mac },
+      update: {
+        lastSeen: new Date(),
+        ...(name && { name }),
+      },
+      create: {
+        id: uuidv4(),
+        mac,
+        name: name || null,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: tag,
+    });
+  } catch (error) {
+    console.error('Error registering RuuviTag:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to register RuuviTag',
+    });
+  }
+});
+
+/**
  * GET /api/ruuvitag/tags
- * Get list of all RuuviTag MAC addresses from vehicles
+ * Get list of all RuuviTag MAC addresses (both assigned and discovered)
  */
 router.get('/tags', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -242,17 +285,36 @@ router.get('/tags', async (req: Request, res: Response): Promise<void> => {
       },
     });
 
-    // Build response with all vehicles that have RuuviTag MACs
-    const tags = vehicles
-      .filter((v) => v.ruuviTagMac)
-      .map((v) => ({
-        mac: v.ruuviTagMac,
-        assigned: true,
-        vehicle: {
-          id: v.id,
-          name: `${v.year} ${v.make} ${v.model}`,
-        },
-      }));
+    // Get all discovered RuuviTags
+    const discoveredTags = await prisma.ruuviTag.findMany({
+      orderBy: { lastSeen: 'desc' },
+    });
+
+    // Build map of assigned MACs
+    const assignedMacs = new Map(
+      vehicles
+        .filter((v) => v.ruuviTagMac)
+        .map((v) => [
+          v.ruuviTagMac,
+          {
+            id: v.id,
+            name: `${v.year} ${v.make} ${v.model}`,
+          },
+        ])
+    );
+
+    // Combine discovered tags with assignment status
+    const allMacs = new Set([
+      ...discoveredTags.map((t) => t.mac),
+      ...Array.from(assignedMacs.keys()),
+    ]);
+
+    const tags = Array.from(allMacs).map((mac) => ({
+      mac,
+      assigned: assignedMacs.has(mac),
+      vehicle: assignedMacs.get(mac) || null,
+      name: discoveredTags.find((t) => t.mac === mac)?.name || null,
+    }));
 
     res.json({
       success: true,

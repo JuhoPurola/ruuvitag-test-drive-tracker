@@ -304,7 +304,7 @@ export default function VehiclesScreen() {
                   {newVehicle.ruuviTagMac}
                 </Text>
               ) : (
-                <Text style={styles.dropdownPlaceholder}>Select RuuviTag</Text>
+                <Text style={styles.dropdownPlaceholder}>Select or Enter RuuviTag</Text>
               )}
               <Text style={styles.dropdownArrow}>
                 {showTagDropdown ? '▲' : '▼'}
@@ -357,12 +357,22 @@ export default function VehiclesScreen() {
                 {ruuviTags.length === 0 && (
                   <View style={styles.tagDropdownItem}>
                     <Text style={styles.tagDropdownEmpty}>
-                      No RuuviTags available
+                      No RuuviTags discovered yet
                     </Text>
                   </View>
                 )}
               </View>
             )}
+
+            <TextInput
+              style={styles.input}
+              placeholder="Or enter MAC address manually"
+              value={newVehicle.ruuviTagMac}
+              onChangeText={(text) =>
+                setNewVehicle({ ...newVehicle, ruuviTagMac: text })
+              }
+              autoCapitalize="characters"
+            />
 
             <View style={styles.modalButtons}>
               <TouchableOpacity

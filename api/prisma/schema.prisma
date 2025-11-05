@@ -136,3 +136,15 @@ model Alert {
   @@index([timestamp])
   @@map("alerts")
 }
+
+model RuuviTag {
+  id          String   @id @default(uuid())
+  mac         String   @unique
+  name        String?  // Optional friendly name
+  lastSeen    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([mac])
+  @@map("ruuvitags")
+}
