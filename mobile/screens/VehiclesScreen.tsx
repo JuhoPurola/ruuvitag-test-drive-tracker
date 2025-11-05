@@ -28,6 +28,7 @@ interface Vehicle {
 interface RuuviTag {
   mac: string;
   assigned: boolean;
+  name?: string | null;
   vehicle: {
     id: string;
     name: string;

@@ -1,6 +1,7 @@
 /**
  * RuuviTag Test Drive Tracker - API Server
  * Main entry point for the Express.js backend
+ * Includes RuuviTag discovery and registration endpoints
  */
 
 import express, { type Express } from 'express';
