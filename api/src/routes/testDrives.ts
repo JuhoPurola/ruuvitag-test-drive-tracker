@@ -141,6 +141,22 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Check if customer already has an active test drive
+    const activeCustomerDrive = await prisma.testDrive.findFirst({
+      where: {
+        customerId,
+        status: 'active',
+      },
+    });
+
+    if (activeCustomerDrive) {
+      res.status(400).json({
+        success: false,
+        error: 'Customer already has an active test drive',
+      });
+      return;
+    }
+
     // Create test drive
     const testDrive = await prisma.testDrive.create({
       data: {
