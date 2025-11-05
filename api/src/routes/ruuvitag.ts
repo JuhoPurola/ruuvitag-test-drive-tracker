@@ -293,8 +293,8 @@ router.get('/tags', async (req: Request, res: Response): Promise<void> => {
     // Build map of assigned MACs
     const assignedMacs = new Map(
       vehicles
-        .filter((v) => v.ruuviTagMac)
-        .map((v) => [
+        .filter((v: { ruuviTagMac: string | null }) => v.ruuviTagMac)
+        .map((v: { id: string; year: number; make: string; model: string; ruuviTagMac: string | null }) => [
           v.ruuviTagMac,
           {
             id: v.id,
@@ -305,7 +305,7 @@ router.get('/tags', async (req: Request, res: Response): Promise<void> => {
 
     // Combine discovered tags with assignment status
     const allMacs = new Set([
-      ...discoveredTags.map((t) => t.mac),
+      ...discoveredTags.map((t: { mac: string }) => t.mac),
       ...Array.from(assignedMacs.keys()),
     ]);
 
@@ -313,7 +313,7 @@ router.get('/tags', async (req: Request, res: Response): Promise<void> => {
       mac,
       assigned: assignedMacs.has(mac),
       vehicle: assignedMacs.get(mac) || null,
-      name: discoveredTags.find((t) => t.mac === mac)?.name || null,
+      name: discoveredTags.find((t: { mac: string; name: string | null }) => t.mac === mac)?.name || null,
     }));
 
     res.json({
