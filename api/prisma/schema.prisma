@@ -53,24 +53,30 @@ model SalesPerson {
 }
 
 model TestDrive {
-  id             String       @id @default(uuid())
-  vehicleId      String
-  vehicle        Vehicle      @relation(fields: [vehicleId], references: [id])
-  customerId     String
-  customer       Customer     @relation(fields: [customerId], references: [id])
-  salesPersonId  String
-  salesPerson    SalesPerson  @relation(fields: [salesPersonId], references: [id])
-  startTime      DateTime     @default(now())
-  endTime        DateTime?
-  status         String       @default("active") // active, completed, cancelled
-  distance       Float?       // in kilometers
-  duration       Int?         // in minutes
-  notes          String?
-  locations      Location[]
-  sensorData     SensorData[]
-  alerts         Alert[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                  String       @id @default(uuid())
+  vehicleId           String
+  vehicle             Vehicle      @relation(fields: [vehicleId], references: [id])
+  customerId          String
+  customer            Customer     @relation(fields: [customerId], references: [id])
+  salesPersonId       String
+  salesPerson         SalesPerson  @relation(fields: [salesPersonId], references: [id])
+  startTime           DateTime     @default(now())
+  endTime             DateTime?
+  status              String       @default("active") // active, completed, cancelled
+  distance            Float?       // in kilometers
+  duration            Int?         // in minutes
+  notes               String?
+  // Driving behavior statistics
+  hardAccelerations   Int          @default(0)
+  hardBraking         Int          @default(0)
+  aggressiveTurns     Int          @default(0)
+  totalSensorReadings Int          @default(0)
+  drivingScore        Int?         // 0-100, calculated from behavior stats
+  locations           Location[]
+  sensorData          SensorData[]
+  alerts              Alert[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   @@index([vehicleId])
   @@index([customerId])

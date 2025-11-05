@@ -101,6 +101,56 @@ router.post('/sensor', async (req: Request, res: Response): Promise<void> => {
       },
     });
 
+    // Analyze driving behavior if acceleration data is present
+    if (accelerationX !== undefined && accelerationY !== undefined && accelerationZ !== undefined) {
+      // Get previous sensor reading to detect changes
+      const previousSensor = await prisma.sensorData.findFirst({
+        where: { testDriveId },
+        orderBy: { timestamp: 'desc' },
+        skip: 1, // Skip the one we just created
+      });
+
+      let hardAccelerationInc = 0;
+      let hardBrakingInc = 0;
+      let aggressiveTurnInc = 0;
+
+      // Detect hard acceleration and braking (X-axis change)
+      if (previousSensor && previousSensor.accelerationX !== null) {
+        const accelChange = accelerationX - previousSensor.accelerationX;
+        if (accelChange > 0.3) {
+          hardAccelerationInc = 1;
+        } else if (accelChange < -0.3) {
+          hardBrakingInc = 1;
+        }
+      }
+
+      // Detect aggressive turns (high Y-axis acceleration)
+      if (Math.abs(accelerationY) > 0.4) {
+        aggressiveTurnInc = 1;
+      }
+
+      // Update test drive statistics
+      const testDrive = await prisma.testDrive.update({
+        where: { id: testDriveId },
+        data: {
+          hardAccelerations: { increment: hardAccelerationInc },
+          hardBraking: { increment: hardBrakingInc },
+          aggressiveTurns: { increment: aggressiveTurnInc },
+          totalSensorReadings: { increment: 1 },
+        },
+      });
+
+      // Calculate and update driving score
+      const totalEvents = testDrive.hardAccelerations + testDrive.hardBraking + testDrive.aggressiveTurns;
+      const aggressiveRate = totalEvents / testDrive.totalSensorReadings;
+      const drivingScore = Math.max(0, Math.round(100 - (aggressiveRate * 100)));
+
+      await prisma.testDrive.update({
+        where: { id: testDriveId },
+        data: { drivingScore },
+      });
+    }
+
     // Check for battery alerts
     if (battery < 20) {
       await prisma.alert.create({

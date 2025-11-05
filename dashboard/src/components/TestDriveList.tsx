@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, type FC } from 'react';
+import { RealTimeSensors } from './RealTimeSensors';
 import './TestDriveList.css';
 
 interface TestDrive {
@@ -22,6 +23,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 export const TestDriveList: FC = () => {
   const [testDrives, setTestDrives] = useState<TestDrive[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedDrive, setExpandedDrive] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTestDrives();
@@ -54,6 +56,10 @@ export const TestDriveList: FC = () => {
     }
   };
 
+  const toggleExpand = (driveId: string): void => {
+    setExpandedDrive(expandedDrive === driveId ? null : driveId);
+  };
+
   if (loading) {
     return <div className="loading">Loading test drives...</div>;
   }
@@ -71,43 +77,61 @@ export const TestDriveList: FC = () => {
     <div className="test-drive-list">
       <h2>Test Drives</h2>
       <div className="drive-grid">
-        {testDrives.map((drive) => (
-          <div key={drive.id} className="drive-card card">
-            <div className="drive-header">
-              <h3>
-                {drive.vehicle.year} {drive.vehicle.make} {drive.vehicle.model}
-              </h3>
-              <span className={getStatusBadge(drive.status)}>{drive.status}</span>
-            </div>
+        {testDrives.map((drive) => {
+          const isExpanded = expandedDrive === drive.id;
+          const isActive = drive.status === 'active';
 
-            <div className="drive-info">
-              <div className="info-row">
-                <span className="label">Customer:</span>
-                <span>{drive.customer.name}</span>
+          return (
+            <div key={drive.id} className="drive-card card">
+              <div className="drive-header">
+                <h3>
+                  {drive.vehicle.year} {drive.vehicle.make} {drive.vehicle.model}
+                </h3>
+                <span className={getStatusBadge(drive.status)}>{drive.status}</span>
               </div>
-              <div className="info-row">
-                <span className="label">Salesperson:</span>
-                <span>{drive.salesPerson.name}</span>
-              </div>
-              <div className="info-row">
-                <span className="label">Started:</span>
-                <span>{new Date(drive.startTime).toLocaleString()}</span>
-              </div>
-              {drive.distance && (
+
+              <div className="drive-info">
                 <div className="info-row">
-                  <span className="label">Distance:</span>
-                  <span>{drive.distance} km</span>
+                  <span className="label">Customer:</span>
+                  <span>{drive.customer.name}</span>
                 </div>
+                <div className="info-row">
+                  <span className="label">Salesperson:</span>
+                  <span>{drive.salesPerson.name}</span>
+                </div>
+                <div className="info-row">
+                  <span className="label">Started:</span>
+                  <span>{new Date(drive.startTime).toLocaleString()}</span>
+                </div>
+                {drive.distance && (
+                  <div className="info-row">
+                    <span className="label">Distance:</span>
+                    <span>{drive.distance} km</span>
+                  </div>
+                )}
+                {drive.duration && (
+                  <div className="info-row">
+                    <span className="label">Duration:</span>
+                    <span>{drive.duration} min</span>
+                  </div>
+                )}
+              </div>
+
+              {isActive && (
+                <button
+                  onClick={() => toggleExpand(drive.id)}
+                  className="btn btn-secondary expand-btn"
+                >
+                  {isExpanded ? 'Hide Sensor Data' : 'View Sensor Data'}
+                </button>
               )}
-              {drive.duration && (
-                <div className="info-row">
-                  <span className="label">Duration:</span>
-                  <span>{drive.duration} min</span>
-                </div>
+
+              {isExpanded && isActive && (
+                <RealTimeSensors testDriveId={drive.id} />
               )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
