@@ -42,6 +42,7 @@ export const RealTimeSensors: FC<RealTimeSensorsProps> = ({ testDriveId }) => {
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [locationData, setLocationData] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [drivingStats, setDrivingStats] = useState<DrivingStats>({
     hardAccelerations: 0,
     hardBraking: 0,
@@ -88,9 +89,11 @@ export const RealTimeSensors: FC<RealTimeSensorsProps> = ({ testDriveId }) => {
           totalReadings: testDrive.totalSensorReadings || 0,
           drivingScore: testDrive.drivingScore,
         });
+        setStatsLoading(false);
       }
     } catch (error) {
       console.error('Error fetching driving stats:', error);
+      setStatsLoading(false);
     }
   };
 
@@ -165,29 +168,35 @@ export const RealTimeSensors: FC<RealTimeSensorsProps> = ({ testDriveId }) => {
       </div>
 
       {/* Driving Score Card */}
-      <div className={`driving-score-card ${drivingRating.class}`}>
-        <div className="score-main">
-          <div className="score-value">{drivingScore}</div>
-          <div className="score-label">
-            <span className="score-emoji">{drivingRating.emoji}</span>
-            <span className="score-rating">{drivingRating.label}</span>
+      {statsLoading ? (
+        <div className="driving-score-card rating-excellent">
+          <div className="loading">Loading driving statistics...</div>
+        </div>
+      ) : (
+        <div className={`driving-score-card ${drivingRating.class}`}>
+          <div className="score-main">
+            <div className="score-value">{drivingScore}</div>
+            <div className="score-label">
+              <span className="score-emoji">{drivingRating.emoji}</span>
+              <span className="score-rating">{drivingRating.label}</span>
+            </div>
+          </div>
+          <div className="score-details">
+            <div className="score-stat">
+              <span className="stat-value">{drivingStats.hardAccelerations}</span>
+              <span className="stat-label">Hard Accel</span>
+            </div>
+            <div className="score-stat">
+              <span className="stat-value">{drivingStats.hardBraking}</span>
+              <span className="stat-label">Hard Brake</span>
+            </div>
+            <div className="score-stat">
+              <span className="stat-value">{drivingStats.aggressiveTurns}</span>
+              <span className="stat-label">Sharp Turns</span>
+            </div>
           </div>
         </div>
-        <div className="score-details">
-          <div className="score-stat">
-            <span className="stat-value">{drivingStats.hardAccelerations}</span>
-            <span className="stat-label">Hard Accel</span>
-          </div>
-          <div className="score-stat">
-            <span className="stat-value">{drivingStats.hardBraking}</span>
-            <span className="stat-label">Hard Brake</span>
-          </div>
-          <div className="score-stat">
-            <span className="stat-value">{drivingStats.aggressiveTurns}</span>
-            <span className="stat-label">Sharp Turns</span>
-          </div>
-        </div>
-      </div>
+      )}
 
       <div className="sensor-card">
         <div className="sensor-grid">
