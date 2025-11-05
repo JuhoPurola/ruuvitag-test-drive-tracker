@@ -58,4 +58,30 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// PUT update vehicle
+router.put('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { make, model, year, vin, color, ruuviTagMac, available } = req.body;
+
+    const vehicle = await prisma.vehicle.update({
+      where: { id },
+      data: {
+        ...(make !== undefined && { make }),
+        ...(model !== undefined && { model }),
+        ...(year !== undefined && { year }),
+        ...(vin !== undefined && { vin }),
+        ...(color !== undefined && { color }),
+        ...(ruuviTagMac !== undefined && { ruuviTagMac }),
+        ...(available !== undefined && { available }),
+      },
+    });
+
+    res.json({ success: true, data: vehicle });
+  } catch (error) {
+    console.error('Error updating vehicle:', error);
+    res.status(500).json({ success: false, error: 'Failed to update vehicle' });
+  }
+});
+
 export default router;
