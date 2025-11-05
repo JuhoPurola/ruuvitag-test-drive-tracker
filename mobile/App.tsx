@@ -18,15 +18,15 @@ export default function App() {
           screenOptions={{
             headerShown: false,
             tabBarStyle: {
-              backgroundColor: '#FFFFFF',
-              borderTopWidth: 1,
-              borderTopColor: '#E5E7EB',
+              backgroundColor: '#1e293b',
+              borderTopWidth: 2,
+              borderTopColor: '#3b82f6',
               paddingBottom: 8,
               paddingTop: 8,
               height: 65,
             },
-            tabBarActiveTintColor: '#3B82F6',
-            tabBarInactiveTintColor: '#9CA3AF',
+            tabBarActiveTintColor: '#3b82f6',
+            tabBarInactiveTintColor: '#64748b',
             tabBarLabelStyle: {
               fontSize: 12,
               fontWeight: '600',
@@ -84,7 +84,7 @@ function TabIcon({ color, emoji }: { color: string; emoji: string }) {
     <div
       style={{
         fontSize: 24,
-        opacity: color === '#3B82F6' ? 1 : 0.5,
+        opacity: color === '#3b82f6' ? 1 : 0.4,
       }}
     >
       {emoji}
