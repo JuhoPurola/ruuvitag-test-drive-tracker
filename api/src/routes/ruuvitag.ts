@@ -225,4 +225,46 @@ router.get('/latest/:testDriveId', async (req: Request, res: Response): Promise<
   }
 });
 
+/**
+ * GET /api/ruuvitag/tags
+ * Get list of all RuuviTag MAC addresses from vehicles
+ */
+router.get('/tags', async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Get all vehicles with their RuuviTag assignments
+    const vehicles = await prisma.vehicle.findMany({
+      select: {
+        id: true,
+        make: true,
+        model: true,
+        year: true,
+        ruuviTagMac: true,
+      },
+    });
+
+    // Build response with all vehicles that have RuuviTag MACs
+    const tags = vehicles
+      .filter((v) => v.ruuviTagMac)
+      .map((v) => ({
+        mac: v.ruuviTagMac,
+        assigned: true,
+        vehicle: {
+          id: v.id,
+          name: `${v.year} ${v.make} ${v.model}`,
+        },
+      }));
+
+    res.json({
+      success: true,
+      data: tags,
+    });
+  } catch (error) {
+    console.error('Error fetching RuuviTags:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch RuuviTags',
+    });
+  }
+});
+
 export default router;

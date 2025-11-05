@@ -25,11 +25,22 @@ interface Vehicle {
   ruuviTagMac: string | null;
 }
 
+interface RuuviTag {
+  mac: string;
+  assigned: boolean;
+  vehicle: {
+    id: string;
+    name: string;
+  } | null;
+}
+
 export default function VehiclesScreen() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [ruuviTags, setRuuviTags] = useState<RuuviTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [newVehicle, setNewVehicle] = useState({
@@ -54,6 +65,7 @@ export default function VehiclesScreen() {
 
   useEffect(() => {
     fetchVehicles();
+    fetchRuuviTags();
   }, []);
 
   const fetchVehicles = async () => {
@@ -70,9 +82,21 @@ export default function VehiclesScreen() {
     }
   };
 
+  const fetchRuuviTags = async () => {
+    try {
+      const response = await axios.get(API_ENDPOINTS.ruuvitags);
+      if (response.data.success) {
+        setRuuviTags(response.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching RuuviTags:', err);
+    }
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchVehicles();
+    fetchRuuviTags();
   };
 
   const closeAlert = () => {
@@ -270,15 +294,75 @@ export default function VehiclesScreen() {
               }
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="RuuviTag MAC (optional)"
-              value={newVehicle.ruuviTagMac}
-              onChangeText={(text) =>
-                setNewVehicle({ ...newVehicle, ruuviTagMac: text })
-              }
-              autoCapitalize="characters"
-            />
+            <Text style={styles.inputLabel}>RuuviTag MAC (optional)</Text>
+            <TouchableOpacity
+              style={styles.dropdownSelector}
+              onPress={() => setShowTagDropdown(!showTagDropdown)}
+            >
+              {newVehicle.ruuviTagMac ? (
+                <Text style={styles.dropdownSelectedText}>
+                  {newVehicle.ruuviTagMac}
+                </Text>
+              ) : (
+                <Text style={styles.dropdownPlaceholder}>Select RuuviTag</Text>
+              )}
+              <Text style={styles.dropdownArrow}>
+                {showTagDropdown ? '▲' : '▼'}
+              </Text>
+            </TouchableOpacity>
+
+            {showTagDropdown && (
+              <View style={styles.tagDropdown}>
+                <TouchableOpacity
+                  style={styles.tagDropdownItem}
+                  onPress={() => {
+                    setNewVehicle({ ...newVehicle, ruuviTagMac: '' });
+                    setShowTagDropdown(false);
+                  }}
+                >
+                  <Text style={styles.tagDropdownText}>None</Text>
+                </TouchableOpacity>
+                {ruuviTags.map((tag) => (
+                  <TouchableOpacity
+                    key={tag.mac}
+                    style={[
+                      styles.tagDropdownItem,
+                      tag.assigned && styles.tagDropdownItemAssigned,
+                    ]}
+                    onPress={() => {
+                      if (!tag.assigned) {
+                        setNewVehicle({ ...newVehicle, ruuviTagMac: tag.mac });
+                        setShowTagDropdown(false);
+                      }
+                    }}
+                    disabled={tag.assigned}
+                  >
+                    <View style={styles.tagDropdownContent}>
+                      <Text
+                        style={[
+                          styles.tagDropdownText,
+                          tag.assigned && styles.tagDropdownTextDisabled,
+                        ]}
+                      >
+                        {tag.mac}
+                      </Text>
+                      {tag.assigned && tag.vehicle && (
+                        <Text style={styles.tagDropdownAssignedLabel}>
+                          Assigned to {tag.vehicle.name}
+                        </Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+                {ruuviTags.length === 0 && (
+                  <View style={styles.tagDropdownItem}>
+                    <Text style={styles.tagDropdownEmpty}>
+                      No RuuviTags available
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -489,5 +573,75 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginBottom: 8,
+    marginTop: 4,
+    letterSpacing: 0.5,
+  },
+  dropdownSelector: {
+    backgroundColor: '#F3F4F6',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  dropdownSelectedText: {
+    fontSize: 14,
+    color: '#1F2937',
+    fontWeight: '500',
+  },
+  dropdownPlaceholder: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  dropdownArrow: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  tagDropdown: {
+    backgroundColor: '#FFFFFF',
+    marginBottom: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    maxHeight: 200,
+    overflow: 'scroll',
+  },
+  tagDropdownItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  tagDropdownItemAssigned: {
+    backgroundColor: '#F9FAFB',
+  },
+  tagDropdownContent: {
+    flex: 1,
+  },
+  tagDropdownText: {
+    fontSize: 14,
+    color: '#1F2937',
+    fontWeight: '500',
+  },
+  tagDropdownTextDisabled: {
+    color: '#9CA3AF',
+  },
+  tagDropdownAssignedLabel: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  tagDropdownEmpty: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    textAlign: 'center',
   },
 });
