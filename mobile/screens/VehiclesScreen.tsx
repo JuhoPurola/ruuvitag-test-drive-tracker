@@ -138,7 +138,7 @@ export default function VehiclesScreen() {
   };
 
   const getStatusColor = (available: boolean) => {
-    return available ? '#10B981' : '#F59E0B';
+    return available ? '#3b82f6' : '#64748b';
   };
 
   const getStatusLabel = (available: boolean) => {

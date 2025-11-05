@@ -27,13 +27,13 @@ export default function CustomAlert({
   const getIconColor = () => {
     switch (type) {
       case 'success':
-        return '#10B981';
+        return '#3b82f6';
       case 'error':
         return '#EF4444';
       case 'confirm':
-        return '#F59E0B';
+        return '#64748b';
       default:
-        return '#3B82F6';
+        return '#3b82f6';
     }
   };
 
