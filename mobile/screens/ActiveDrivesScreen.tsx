@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   statusBadge: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#3b82f6',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -378,11 +378,11 @@ const styles = StyleSheet.create({
   },
   durationValue: {
     fontSize: 18,
-    color: '#10B981',
+    color: '#3b82f6',
     fontWeight: '600',
   },
   endButton: {
-    backgroundColor: '#EF4444',
+    backgroundColor: '#64748b',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
